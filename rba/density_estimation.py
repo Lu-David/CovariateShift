@@ -6,13 +6,15 @@ from sklearn.neighbors import KernelDensity
 from scipy.stats import multivariate_normal
 
 
+
+
 def get_kernel_density_estimator(X_s, X_t, bandwidth=0.7):
     # Note: Changing bandwidth is an important parameter to tune!
     kde_s = KernelDensity(kernel='gaussian', bandwidth=bandwidth).fit(X_s)
     kde_t = KernelDensity(kernel='gaussian', bandwidth=bandwidth).fit(X_t)
 
     def kde(x):
-        return np.exp(kde_s.score_samples(x)) / np.exp(kde_t.score_samples(x))
+        return torch.Tensor(np.exp(kde_s.score_samples(x)) / np.exp(kde_t.score_samples(x))).unsqueeze(1)
 
     return kde
 
@@ -59,7 +61,6 @@ def get_lr_density_estimator(X_s, X_t, max_itr = 10000, weight_decays = [1, 5, 1
         loss, pred, acc = log_test(model, X_valid, y_valid)
         losses[i] = loss
     ind_min = torch.argmin(loss)
-    ind_min = 2
 
     X_train = torch.cat((X_s, X_t))
     y_train = torch.cat((torch.ones((ns_row, 1)), torch.zeros((nt_row, 1))))
@@ -76,6 +77,6 @@ def get_lr_density_estimator(X_s, X_t, max_itr = 10000, weight_decays = [1, 5, 1
 
     def lr(x):
         pred = model(x)
-        return pred
+        return pred.squeeze() / (1 - pred.squeeze())
 
     return lr

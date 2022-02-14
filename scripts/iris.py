@@ -31,4 +31,3 @@ n_row, n_col = X_s.shape
 
 
 d_ss, d_st, d_ts, d_tt = lr_density_estimation(X_s, X_t, [0.1, 1, 10])
-print(d_ss)

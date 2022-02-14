@@ -4,12 +4,12 @@ import numpy as np
 import torchviz
 from rba.models.rba_classifier import RBAClassifier
 
-def rba_train(X_s, y_s, r_st, max_itr = 10000, lr = 0.01, weight_decay = 0):
+def rba_train(X_s, y_s, dr_estimator, max_itr = 10000, lr = 0.01, weight_decay = 0):
 
     _, n_col = X_s.shape
     _, out_features = y_s.shape
 
-    model = RBAClassifier(in_features = n_col, out_features=out_features)
+    model = RBAClassifier(dr_estimator=dr_estimator, in_features = n_col, out_features=out_features)
     loss_fn = nn.BCELoss() 
     optimizer = torch.optim.Adam(model.parameters(), lr = lr, weight_decay = weight_decay)
 
@@ -21,7 +21,7 @@ def rba_train(X_s, y_s, r_st, max_itr = 10000, lr = 0.01, weight_decay = 0):
     for i in range(max_itr): 
         optimizer.zero_grad()
         
-        outputs = model.forward(X_s, r_st)
+        outputs = model.forward(X_s)
         # print(torchviz.make_dot(outputs.mean(), params=dict(model.named_parameters())))
         outputs.backward(y_s)
         optimizer.step()

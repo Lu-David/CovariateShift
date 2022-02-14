@@ -9,7 +9,7 @@ class LogClassifier(nn.Module):
     Single layer classifier that supports logistic regression and importance reweighting methods
     """
 
-    def __init__(self, in_features = 2, out_features = 1, bias = True):
+    def __init__(self, dr_estimator, in_features = 2, out_features = 1, bias = True):
         """[summary]
 
         Args:
@@ -22,7 +22,8 @@ class LogClassifier(nn.Module):
         
         self.layer1 = nn.Linear(in_features, out_features, bias = bias)
         self.activation1 = nn.Sigmoid()
-        self.__name__ = "Log"
+        self.dr_estimator = dr_estimator
+        self.__name__ = "Log_" + dr_estimator.__name__
 
     def forward(self, input):
         """[summary]
@@ -33,6 +34,7 @@ class LogClassifier(nn.Module):
         Returns:
             torch.Tensor: predictions
         """
-
-        return self.activation1(self.layer1(input))
+        r_st = self.dr_estimator(input).detach()
+        r_st = torch.clip(r_st, -5000, 5000)
+        return self.activation1(self.layer1(input) * r_st)
     
