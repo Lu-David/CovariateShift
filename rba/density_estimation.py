@@ -2,13 +2,32 @@ import numpy as np
 from rba.train.log_train import log_train
 from rba.test.log_test import log_test
 import torch
+from sklearn.neighbors import KernelDensity
+from scipy.stats import multivariate_normal
 
-def kernel_density_estimation():
-    pass
 
-def lr_density_estimation(X_s, X_t, weight_decays = [0.0625, 1, 16]):
+def get_kernel_density_estimator(X_s, X_t, bandwidth=0.7):
+    # Note: Changing bandwidth is an important parameter to tune!
+    kde_s = KernelDensity(kernel='gaussian', bandwidth=bandwidth).fit(X_s)
+    kde_t = KernelDensity(kernel='gaussian', bandwidth=bandwidth).fit(X_t)
+
+    def kde(x):
+        return np.exp(kde_s.score_samples(x)) / np.exp(kde_t.score_samples(x))
+
+    return kde
+
+def get_mvn_estimator(mu_s, var_s, mu_t, var_t):
+    mvn_s = multivariate_normal(mu_s, var_s)
+    mvn_t = multivariate_normal(mu_t, var_t)
     
-    np.random.seed(10)
+    def mvn(x):
+        return mvn_s(x) / mvn_t(x)
+
+    return mvn
+
+
+# TODO Troubleshoot whether density estimation is correct or not. 
+def get_lr_density_estimator(X_s, X_t, max_itr = 10000, weight_decays = [1, 5, 15]):
 
     ns_row, _ = X_s.shape
     nt_row, _ = X_t.shape
@@ -16,8 +35,8 @@ def lr_density_estimation(X_s, X_t, weight_decays = [0.0625, 1, 16]):
     inda_s = np.arange(ns_row)
     inda_t = np.arange(nt_row)
 
-    nv_s = int(np.floor(0.2 * ns_row))
-    nv_t = int(np.floor(0.2 * nt_row))
+    nv_s = int(np.floor(0.05 * ns_row))
+    nv_t = int(np.floor(0.05 * nt_row))
 
     indv_s = np.random.permutation(ns_row)[:nv_s] 
     indv_t = np.random.permutation(nt_row)[:nv_t]
@@ -39,14 +58,14 @@ def lr_density_estimation(X_s, X_t, weight_decays = [0.0625, 1, 16]):
         model = log_train(X_train, y_train, rt_st, weight_decay=lamb)
         loss, pred, acc = log_test(model, X_valid, y_valid)
         losses[i] = loss
-
     ind_min = torch.argmin(loss)
+    ind_min = 2
 
     X_train = torch.cat((X_s, X_t))
     y_train = torch.cat((torch.ones((ns_row, 1)), torch.zeros((nt_row, 1))))
     r_st = torch.ones((ns_row + nt_row, 1))
 
-    model = log_train(X_train, y_train, r_st, weight_decay=weight_decays[ind_min])
+    model = log_train(X_train, y_train, r_st, max_itr=10000, weight_decay=weight_decays[ind_min])
     _, pred, _ = log_test(model, X_train, y_train)
 
     d_ss = pred[:ns_row, 0]
@@ -55,6 +74,8 @@ def lr_density_estimation(X_s, X_t, weight_decays = [0.0625, 1, 16]):
     d_ts = pred[ns_row:, 0]
     d_tt = 1 - pred[ns_row:, 0]
 
-    print("Finish Density Estimation")
+    def lr(x):
+        pred = model(x)
+        return pred
 
-    return d_ss, d_st, d_ts, d_tt, model
+    return lr

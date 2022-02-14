@@ -34,6 +34,7 @@ class RBAClassifier(nn.Module):
 
         super(RBAClassifier, self).__init__()
         self.layer1 = nn.Linear(in_features, out_features, bias = bias)
+        self.__name__ = "RBA"
 
     def forward(self, input, r_st):
         """[summary]

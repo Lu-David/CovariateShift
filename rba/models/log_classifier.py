@@ -22,6 +22,7 @@ class LogClassifier(nn.Module):
         
         self.layer1 = nn.Linear(in_features, out_features, bias = bias)
         self.activation1 = nn.Sigmoid()
+        self.__name__ = "Log"
 
     def forward(self, input):
         """[summary]
