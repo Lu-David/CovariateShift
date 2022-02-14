@@ -22,8 +22,10 @@ class LogClassifier(nn.Module):
         
         self.layer1 = nn.Linear(in_features, out_features, bias = bias)
         self.activation1 = nn.Sigmoid()
-        self.dr_estimator = dr_estimator
         self.__name__ = "Log_" + dr_estimator.__name__
+        self.dr_estimator = dr_estimator
+        self.r_ts = None
+        self.prev = None
 
     def forward(self, input):
         """[summary]
@@ -34,7 +36,14 @@ class LogClassifier(nn.Module):
         Returns:
             torch.Tensor: predictions
         """
-        r_st = self.dr_estimator(input).detach()
-        r_st = torch.clip(r_st, -5000, 5000)
-        return self.activation1(self.layer1(input) * r_st)
+
+        if self.r_ts == None or len(input) != self.prev:
+            self.r_ts = 1 / self.dr_estimator(input).detach()
+            self.r_ts = torch.clip(self.r_ts, -5000, 5000)
+            self.prev = len(input)
+        
+        if self.training:
+            return self.activation1(self.layer1(input) * self.r_ts)
+
+        return self.activation1(self.layer1(input))
     

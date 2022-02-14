@@ -8,9 +8,8 @@ import os
 
 
 def two_dim_plot(model, x, y):
-    
     mean = torch.mean(x, axis=0)
-    std = torch.std(x, axis = 0)
+    std = torch.std(x, axis=0)
     
     maxs = mean + 10 * std
     mins = mean - 10 * std
@@ -21,6 +20,7 @@ def two_dim_plot(model, x, y):
     coors = np.dstack((X_dim1, X_dim2))
     coors = torch.FloatTensor(coors.reshape((dims[0] * dims[1], -1)))
 
+    model.eval()
     predictions = model(coors)
     predictions = torch.reshape(predictions, (dims[0], dims[1]))
 

@@ -36,6 +36,8 @@ class RBAClassifier(nn.Module):
         self.layer1 = nn.Linear(in_features, out_features, bias = bias)
         self.__name__ = "RBA_" + dr_estimator.__name__
         self.dr_estimator = dr_estimator
+        self.r_st = None
+        self.prev = None
 
     def forward(self, input):
         """[summary]
@@ -46,7 +48,10 @@ class RBAClassifier(nn.Module):
         Returns:
             torch.Tensor: predictions
         """
-        
-        r_st = self.dr_estimator(input).detach()
-        r_st = torch.clip(torch.Tensor(r_st).unsqueeze(1), -5000, 5000)
-        return RBAGrad.apply(self.layer1(input), r_st)
+        # TODO: Fix the hacky workaround to limit recalcultion of density ratios
+        if self.r_st == None or len(input) != self.prev:
+            self.r_st = self.dr_estimator(input).detach()
+            self.r_st = torch.clip(self.r_st, -5000, 5000)
+            self.prev = len(input)
+
+        return RBAGrad.apply(self.layer1(input), self.r_st)

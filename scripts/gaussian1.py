@@ -2,7 +2,7 @@ from rba.train.rba_train import rba_train
 from rba.train.log_train import log_train
 from rba.test.rba_test import rba_test
 from rba.test.log_test import log_test
-from rba.density_estimation import get_kernel_density_estimator, get_mvn_estimator, get_lr_density_estimator
+from rba.density_estimation import get_kernel_density_estimator, get_mvn_estimator, get_lr_density_estimator, ones
 from rba.plot import two_dim_plot
 
 import scipy.io
@@ -42,34 +42,27 @@ Get Density Ratio Estimators
 kernel_dr = get_kernel_density_estimator(x_1, x_2)
 mvn_dr = get_mvn_estimator(mu_s, var_s, mu_t, var_t)
 # lr_dr = get_lr_density_estimator(x_1, x_2)
-def ones(x):
-    return torch.ones((x.shape[0], 1))
 ones_dr = ones
 
-# """
-# RBA Kernel
-# """
-# r_st = torch.ones((x_1.shape[0], 1)) # 1 / torch.Tensor(kernel_dr(x_1)).unsqueeze(1)
-# rba_model = rba_train(x_1, y_1, r_st, max_itr = 10000, lr = 0.01) # torch.Tensor(d_s / d_t).unsqueeze(1)
-# loss, preds, acc = rba_test(rba_model, x_2, y_2, r_st)
-# print(f"Target Loss: {loss}. Target Accuracy: {acc}")
-# two_dim_plot(rba_model, kernel_dr, x_1, y_1)
+"""
+RBA MVN
+"""
+rba_model = rba_train(x_1, y_1, mvn_dr, max_itr = 10000, lr = 0.01) 
+loss, preds, acc = rba_test(rba_model, x_2, y_2)
+two_dim_plot(rba_model, x_1, y_1)
 
 """
-Log Kernel
+Log MVN (Importance reweighting)
 """
-log_model = log_train(x_1, y_1, ones_dr, max_itr = 10000, lr = 0.01) # torch.Tensor(d_s / d_t).unsqueeze(1)
-loss, preds, acc = log_test(log_model, x_2, y_2)
-print(f"Target Loss: {loss}. Target Accuracy: {acc}")
-two_dim_plot(log_model, x_1, y_1)
+iw_model = log_train(x_1, y_1, mvn_dr, max_itr = 10000, lr = 0.01) 
+loss, preds, acc = log_test(iw_model, x_2, y_2)
+two_dim_plot(iw_model, x_1, y_1)
 
-# """
-# RBA LR
-# """
-# r_st = torch.Tensor(lr_dr(x_1)).unsqueeze(1)
-# rba_model = rba_train(x_1, y_1, r_st, max_itr = 10000, lr = 0.01) # torch.Tensor(d_s / d_t).unsqueeze(1)
-# loss, preds, acc = rba_test(rba_model, x_2, y_2, r_st)
-# print(f"Target Loss: {loss}. Target Accuracy: {acc}")
-# two_dim_plot(rba_model, lr_dr, x_1, y_1)
+"""
+Log ones (regular logistic function)
+"""
+log_model = rba_train(x_1, y_1, ones_dr, max_itr = 10000, lr = 0.01) 
+loss, preds, acc = rba_test(rba_model, x_2, y_2)
+two_dim_plot(rba_model, x_1, y_1)
 
 

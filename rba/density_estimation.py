@@ -6,7 +6,8 @@ from sklearn.neighbors import KernelDensity
 from scipy.stats import multivariate_normal
 
 
-
+def ones(x):
+    return torch.ones((x.shape[0], 1))
 
 def get_kernel_density_estimator(X_s, X_t, bandwidth=0.7):
     # Note: Changing bandwidth is an important parameter to tune!
@@ -23,12 +24,12 @@ def get_mvn_estimator(mu_s, var_s, mu_t, var_t):
     mvn_t = multivariate_normal(mu_t, var_t)
     
     def mvn(x):
-        return mvn_s(x) / mvn_t(x)
+        return torch.Tensor(mvn_s.pdf(x) / mvn_t.pdf(x)).unsqueeze(1)
 
     return mvn
 
 
-# TODO Troubleshoot whether density estimation is correct or not. 
+# TODO Troubleshoot whether lr density estimation is correct or not. 
 def get_lr_density_estimator(X_s, X_t, max_itr = 10000, weight_decays = [1, 5, 15]):
 
     ns_row, _ = X_s.shape
