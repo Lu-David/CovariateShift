@@ -1,9 +1,4 @@
-from rba.train.rba_train import rba_train
-from rba.train.log_train import log_train
-from rba.test.rba_test import rba_test
-from rba.test.log_test import log_test
-from rba.density_estimation import get_kernel_density_estimator, get_mvn_estimator, get_lr_density_estimator, ones
-from rba.plot import two_dim_plot
+from rba.experiment import BivariateExperiment
 
 import scipy.io
 import numpy as np
@@ -35,34 +30,13 @@ mu_t = [7, 7]
 var_t = [[3, 2], [2, 3]] 
 
 
-"""
-Get Density Ratio Estimators
-"""
+experiment = BivariateExperiment(mu_s, var_s, mu_t, var_t)
+experiment.x_1 = x_1
+experiment.y_1 = y_1
+experiment.x_2 = x_2
+experiment.y_2 = y_2
+experiment.train_all()
+experiment.plot_all()
 
-kernel_dr = get_kernel_density_estimator(x_1, x_2)
-mvn_dr = get_mvn_estimator(mu_s, var_s, mu_t, var_t)
-# lr_dr = get_lr_density_estimator(x_1, x_2)
-ones_dr = ones
-
-"""
-RBA MVN
-"""
-rba_model = rba_train(x_1, y_1, mvn_dr, max_itr = 10000, lr = 0.01) 
-loss, preds, acc = rba_test(rba_model, x_2, y_2)
-two_dim_plot(rba_model, x_1, y_1)
-
-"""
-Log MVN (Importance reweighting)
-"""
-iw_model = log_train(x_1, y_1, mvn_dr, max_itr = 10000, lr = 0.01) 
-loss, preds, acc = log_test(iw_model, x_2, y_2)
-two_dim_plot(iw_model, x_1, y_1)
-
-"""
-Log ones (regular logistic function)
-"""
-log_model = rba_train(x_1, y_1, ones_dr, max_itr = 10000, lr = 0.01) 
-loss, preds, acc = rba_test(rba_model, x_2, y_2)
-two_dim_plot(rba_model, x_1, y_1)
 
 

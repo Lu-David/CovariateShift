@@ -3,17 +3,6 @@ import torch
 import torch.nn as nn
 
 def rba_test(model, X_t, y_t):
-    """[summary]
-
-    Args:
-        model ([type]): [description]
-        X_t ([type]): [description]
-        y_t ([type]): [description]
-        r_st ([type]): [description]
-
-    Returns:
-        [type]: [description]
-    """
     n_row, _ = X_t.shape
     
     model.eval()

@@ -23,7 +23,7 @@ class RBAClassifier(nn.Module):
     Single layer robust bias aware (RBA) classifier
     """
 
-    def __init__(self, dr_estimator, in_features = 2, out_features = 1, bias = True):
+    def __init__(self, dr_estimator, in_features = 2, out_features = 1, degree = 1, bias = True):
         """[summary]
 
         Args:
