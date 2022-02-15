@@ -73,7 +73,7 @@ class BivariateExperiment():
         neg = self.x_1[np.array(self.y_1 == 0).flatten()]
         ax[0].scatter(pos[:,0], pos[:,1], marker="x", color="black", s = 7)
         ax[0].scatter(neg[:,0], neg[:,1], marker="o", color="white", s = 7)
-        ax[0].set_title(f"Source{model.__name__}")
+        ax[0].set_title(f"Source_{model.__name__}")
 
         ax[1].imshow(predictions.detach().numpy(), cmap='Spectral', interpolation='nearest', origin='lower', extent=[mins[0], maxs[0], mins[1], maxs[1]])
 
