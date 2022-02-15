@@ -13,6 +13,7 @@ Pytorch implementation of 2014 Liu Paper https://proceedings.neurips.cc/paper/20
 git clone git@github.com:Lu-David/CovariateShift.git
 cd CovariateShift
 conda env create -f environment.yml
+conda activate CovariateShift
 pip install -e .
 ```
 
