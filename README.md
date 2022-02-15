@@ -21,3 +21,4 @@ After create conda env, run the following command to get some figures.
 ```sh
 python ./scripts/gaussian_random.py
 ```
+A png of model results will appear in your current directory.
