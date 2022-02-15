@@ -17,6 +17,7 @@ pip install -e .
 ```
 
 ## Usage
+After create conda env, run the following command to get some figures.
 ```sh
-TODO
+python ./scripts/gaussian_random.py
 ```
