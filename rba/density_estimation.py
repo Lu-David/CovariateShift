@@ -58,7 +58,7 @@ def get_lr_density_estimator(X_s, X_t, max_itr = 10000, weight_decays = [1, 5, 1
     
     losses = torch.zeros((len(weight_decays), 1))
     for i, lamb in enumerate(weight_decays):
-        model = log_train(X_train, y_train, rt_st, weight_decay=lamb)
+        model = log_train(X_train, y_train, ones, weight_decay=lamb)
         loss, pred, acc = log_test(model, X_valid, y_valid)
         losses[i] = loss
     ind_min = torch.argmin(loss)
@@ -67,7 +67,7 @@ def get_lr_density_estimator(X_s, X_t, max_itr = 10000, weight_decays = [1, 5, 1
     y_train = torch.cat((torch.ones((ns_row, 1)), torch.zeros((nt_row, 1))))
     r_st = torch.ones((ns_row + nt_row, 1))
 
-    model = log_train(X_train, y_train, r_st, max_itr=10000, weight_decay=weight_decays[ind_min])
+    model = log_train(X_train, y_train, ones, max_itr=10000, weight_decay=weight_decays[ind_min])
     _, pred, _ = log_test(model, X_train, y_train)
 
     d_ss = pred[:ns_row, 0]
@@ -78,6 +78,6 @@ def get_lr_density_estimator(X_s, X_t, max_itr = 10000, weight_decays = [1, 5, 1
 
     def lr(x):
         pred = model(x)
-        return pred.squeeze() / (1 - pred.squeeze())
+        return pred / (1 - pred)
 
     return lr
