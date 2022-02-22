@@ -21,6 +21,9 @@ class LogClassifier(nn.Module):
         super(LogClassifier, self).__init__()
         
         self.layer1 = nn.Linear(in_features, out_features, bias = bias)
+        self.layer2 = nn.Linear(8, 8)
+        self.layer3 = nn.Linear(8, out_features)
+
         self.activation1 = nn.Sigmoid()
         self.__name__ = "Log_" + dr_estimator.__name__
         self.dr_estimator = dr_estimator

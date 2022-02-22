@@ -4,6 +4,8 @@ from matplotlib.patches import Ellipse
 import matplotlib.transforms as transforms
 import torch
 
+from rba.util import get_poly_data
+
 def confidence_ellipse(x, y, ax, n_std=3.0, facecolor='none', **kwargs):
     """
     Create a plot of the covariance confidence ellipse of *x* and *y*.
@@ -62,12 +64,12 @@ def scatter_binary(x, y, ax):
     ax.scatter(pos[:,0], pos[:,1], marker="x", color="black", s = 7)
     ax.scatter(neg[:,0], neg[:,1], marker="o", color="white", s = 7)
 
-def heatmap_model(x, y, ax, model):
+def heatmap_model(x, y, ax, model, poly_features = 1):
     mean = torch.mean(x, axis=0)
     std = torch.std(x, axis=0)
     
-    maxs = torch.max(x, dim = 0).values
-    mins = torch.min(x, dim = 0).values
+    maxs = torch.max(x, dim = 0).values + 10
+    mins = torch.min(x, dim = 0).values - 20
 
     res = 0.01
     X_dim1, X_dim2 = np.meshgrid(np.arange(mins[0], maxs[0] + res, res), np.arange(mins[1], maxs[1] + res, res))
@@ -75,6 +77,8 @@ def heatmap_model(x, y, ax, model):
 
     coors = np.dstack((X_dim1, X_dim2))
     coors = torch.FloatTensor(coors.reshape((dims[0] * dims[1], -1)))
+
+    coors = torch.Tensor(get_poly_data(coors, poly_features))
 
     model.eval()
     predictions = model(coors)

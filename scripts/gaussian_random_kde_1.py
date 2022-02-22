@@ -7,5 +7,5 @@ mu_t = [7, 7]
 var_t = [[3, 2], [2, 3]] 
 
 experiment = BivariateExperiment(mu_s, var_s, mu_t, var_t)
-experiment.train_all(experiment.kernel_dr)
+experiment.train_all(experiment.kde_dr)
 experiment.plot_all()
