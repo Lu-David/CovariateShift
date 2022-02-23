@@ -31,12 +31,16 @@ def get_mvn_estimator(mu_s, var_s, mu_t, var_t):
 
     return mvn
 
+# TODO fix gmm
 def get_gmm_estimator(X_s, X_t):
-    n_components = 2
+    _, n_col = X_s.shape
+    n_components = n_col
     means_init = torch.stack((
         torch.mean(X_s, dim=0),
         torch.mean(X_t, dim=0),
-    ), dim=1)
+    ), dim=0)
+
+    print("means_init", means_init)
 
     X_s = torch.Tensor(X_s)
     X_t = torch.Tensor(X_t)
@@ -62,16 +66,15 @@ def get_gmm_estimator(X_s, X_t):
     y_train = torch.cat((torch.ones((ns_row - nv_s, 1)), torch.zeros((nt_row - nv_t, 1)) ))
     y_valid = torch.cat((torch.ones((nv_s, 1)), torch.zeros((nv_t, 1)) ))
     
-    model = GaussianMixture(n_components, means_init=means_init, tol=0.007).fit(X_train, y_train)
+    model = GaussianMixture(n_components, means_init=means_init).fit(X_train, y_train)
 
     def gmm(x):
         pred = model.predict(x)
+        pred[pred == 0] = 0.001
         return torch.Tensor(pred / (1 - pred)).unsqueeze(1)
     
     return gmm
 
-
-# TODO Troubleshoot whether lr density estimation is correct or not. 
 def get_lrdr_estimator(X_s, X_t, weight_decays = [1, 5, 15]):
 
     poly_features = 2

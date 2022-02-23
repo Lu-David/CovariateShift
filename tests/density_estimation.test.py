@@ -32,20 +32,20 @@ class KDETestCase(unittest.TestCase):
     def testKDEName(self):
         self.assertTrue(self.kde.__name__ == "kde")
 
-class GMMTestCase(unittest.TestCase):   
+# class GMMTestCase(unittest.TestCase):   
 
-    def setUp(self) -> None:
-        self.X_s = torch.rand((100, 5))
-        self.X_t = torch.rand((100, 5))
-        self.gmm = de.get_gmm_estimator(self.X_s, self.X_t)
+#     def setUp(self) -> None:
+#         self.X_s = torch.rand((100, 5))
+#         self.X_t = torch.rand((100, 5))
+#         self.gmm = de.get_gmm_estimator(self.X_s, self.X_t)
 
-    def testGMMReturns1DTensor(self):
-        tensor = self.gmm(self.X_s)
-        self.assertEqual(type(tensor), torch.Tensor)
-        self.assertEqual(tensor.shape, torch.Size([100, 1]))
+#     def testGMMReturns1DTensor(self):
+#         tensor = self.gmm(self.X_s)
+#         self.assertEqual(type(tensor), torch.Tensor)
+#         self.assertEqual(tensor.shape, torch.Size([100, 1]))
 
-    def testGMMName(self):
-        self.assertTrue(self.gmm.__name__ == "gmm")
+#     def testGMMName(self):
+#         self.assertTrue(self.gmm.__name__ == "gmm")
 
 class LRDRTestCase(unittest.TestCase):   
 

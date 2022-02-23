@@ -3,9 +3,11 @@ import torch.nn as nn
 import numpy as np
 import torchviz
 from rba.models.log_classifier import LogClassifier
+from rba.util import get_poly_data
 
-def log_train(X_s, y_s, dr_estimator, max_itr = 10000, lr = 0.01, weight_decay = 0):
+def log_train(X_s, y_s, dr_estimator, max_itr = 10000, lr = 0.01, weight_decay = 0, poly_features = 1):
 
+  X_s = get_poly_data(X_s, poly_features)
   _, n_col = X_s.shape
   _, out_features = y_s.shape
 

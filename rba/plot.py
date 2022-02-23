@@ -68,8 +68,10 @@ def heatmap_model(x, y, ax, model, poly_features = 1):
     mean = torch.mean(x, axis=0)
     std = torch.std(x, axis=0)
     
-    maxs = torch.max(x, dim = 0).values + 10
-    mins = torch.min(x, dim = 0).values - 20
+    maxs = torch.max(x, dim = 0).values
+    maxs = maxs + 0.2 * maxs
+    mins = torch.min(x, dim = 0).values
+    mins = mins - 0.2 * mins
 
     res = 0.01
     X_dim1, X_dim2 = np.meshgrid(np.arange(mins[0], maxs[0] + res, res), np.arange(mins[1], maxs[1] + res, res))

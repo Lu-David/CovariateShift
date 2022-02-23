@@ -6,7 +6,7 @@ import torch
 from sklearn.preprocessing import PolynomialFeatures
 
 class BivariateGaussian:
-    def __init__(self, mu_s, var_s, mu_t, var_t, boundary_degree = 3, poly_features = 1):
+    def __init__(self, mu_s, var_s, mu_t, var_t, boundary_degree = 3):
         self.mu_s = mu_s
         self.var_s = var_s
         self.mu_t = mu_t
@@ -16,7 +16,6 @@ class BivariateGaussian:
         self.mvn_t = multivariate_normal(mu_t, var_t)
 
         self.boundary_degree = boundary_degree
-        self.poly_features = poly_features
     
     def gen_rand_decision_boundary(self):
         samples = (self.mvn_s.rvs(self.boundary_degree + 1) 
@@ -39,10 +38,6 @@ class BivariateGaussian:
         # TODO add noise
         x_s = self.mvn_s.rvs(num_points)
         x_t = self.mvn_t.rvs(num_points)
-        poly = PolynomialFeatures(self.poly_features, include_bias=False)
-
-        x_s = poly.fit_transform(x_s)
-        x_t = poly.fit_transform(x_t)
 
         get_y = self.gen_rand_decision_boundary()
         
