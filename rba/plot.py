@@ -64,7 +64,7 @@ def scatter_binary(x, y, ax):
     ax.scatter(pos[:,0], pos[:,1], marker="x", color="black", s = 7)
     ax.scatter(neg[:,0], neg[:,1], marker="o", color="white", s = 7)
 
-def heatmap_model(x, y, ax, model, poly_features = 1):
+def heatmap_model(x, y, ax, model, dr_estimator):
     mean = torch.mean(x, axis=0)
     std = torch.std(x, axis=0)
     
@@ -80,10 +80,10 @@ def heatmap_model(x, y, ax, model, poly_features = 1):
     coors = np.dstack((X_dim1, X_dim2))
     coors = torch.FloatTensor(coors.reshape((dims[0] * dims[1], -1)))
 
-    coors = torch.Tensor(get_poly_data(coors, poly_features))
+    r_st = dr_estimator(coors)
 
     model.eval()
-    predictions = model(coors)
+    predictions = model(coors, r_st)
     predictions = torch.reshape(predictions, (dims[0], dims[1]))
 
     ax.imshow(predictions.detach().numpy(), cmap='Spectral', interpolation='nearest', origin='lower', extent=[mins[0], maxs[0], mins[1], maxs[1]])

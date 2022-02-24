@@ -5,14 +5,12 @@ import torchviz
 from rba.models.rba_classifier import RBAClassifier
 from rba.util import get_poly_data
 
-def rba_train(X_s, y_s, dr_estimator, max_itr = 10000, lr = 0.01, weight_decay = 0, poly_features = 1):
-
-    X_s = get_poly_data(X_s, poly_features)
+def rba_train(X_s, y_s, r_st, max_itr = 10000, lr = 0.01, weight_decay = 0, poly_features = 1):
 
     _, n_col = X_s.shape
     _, out_features = y_s.shape
 
-    model = RBAClassifier(dr_estimator=dr_estimator, in_features = n_col, out_features=out_features)
+    model = RBAClassifier(in_features = n_col, out_features=out_features)
     loss_fn = nn.BCELoss() 
     optimizer = torch.optim.Adam(model.parameters(), lr = lr, weight_decay = weight_decay)
 
@@ -24,7 +22,7 @@ def rba_train(X_s, y_s, dr_estimator, max_itr = 10000, lr = 0.01, weight_decay =
     for i in range(max_itr): 
         optimizer.zero_grad()
         
-        outputs = model.forward(X_s)
+        outputs = model.forward(X_s, r_st)
         # print(torchviz.make_dot(outputs.mean(), params=dict(model.named_parameters())))
         outputs.backward(y_s)
         optimizer.step()
@@ -34,8 +32,6 @@ def rba_train(X_s, y_s, dr_estimator, max_itr = 10000, lr = 0.01, weight_decay =
             print(f"Loss at step {i}: {float(loss.data)}")
 
     return model
-
-    
 
 if __name__ == "__main__":
     pass

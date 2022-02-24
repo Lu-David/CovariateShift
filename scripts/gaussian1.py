@@ -1,4 +1,6 @@
 from rba.experiment import BivariateExperiment
+from rba.train.rba_train import rba_train
+from rba.density_estimation import get_mvn_estimator
 
 import scipy.io
 import numpy as np
@@ -29,13 +31,18 @@ var_s = [[3, -2], [-2, 3]]
 mu_t = [7, 7] 
 var_t = [[3, 2], [2, 3]] 
 
+mvn = get_mvn_estimator(mu_s, var_s, mu_t, var_t)
+
+# r_st = mvn(x_1)
+# rba_train(x_1, y_1, r_st)
 
 experiment = BivariateExperiment(mu_s, var_s, mu_t, var_t, poly_features=1)
 experiment.x_1 = x_1
 experiment.y_1 = y_1
 experiment.x_2 = x_2
 experiment.y_2 = y_2
-experiment.train_all(experiment.gmm_dr)
+experiment.set_dr_estimator("mvn")
+experiment.train_all()
 experiment.plot_all()
 
 

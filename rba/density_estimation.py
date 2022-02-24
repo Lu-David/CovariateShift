@@ -8,6 +8,10 @@ from sklearn.neighbors import KernelDensity
 from scipy.stats import multivariate_normal
 from sklearn.mixture import GaussianMixture
 
+def inverse(func):
+    def estimator(x):
+            return 1 / func(x)
+    return estimator
 
 def ones(x):
     return torch.ones((x.shape[0], 1))
@@ -125,7 +129,7 @@ def get_lrdr_estimator(X_s, X_t, weight_decays = [1, 5, 15]):
     y_train = torch.cat((torch.ones((ns_row, 1)), torch.zeros((nt_row, 1))))
 
     model = log_train(X_train, y_train, ones, max_itr=10000, weight_decay=weight_decays[ind_min])
-
+    
     def lrdr(x):
         x = torch.Tensor(get_poly_data(x, poly_features))
         pred = model(x)

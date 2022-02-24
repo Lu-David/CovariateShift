@@ -2,16 +2,16 @@ import torch
 import torch.nn as nn
 import numpy as np
 import torchviz
-from rba.models.log_classifier import LogClassifier
 from rba.util import get_poly_data
+from rba.models.log_classifier import LogClassifier
 
-def log_train(X_s, y_s, dr_estimator, max_itr = 10000, lr = 0.01, weight_decay = 0, poly_features = 1):
+def log_train(X_s, y_s, r_ts, max_itr = 10000, lr = 0.01, weight_decay = 0, poly_features = 1):
 
   X_s = get_poly_data(X_s, poly_features)
   _, n_col = X_s.shape
   _, out_features = y_s.shape
 
-  lr_model = LogClassifier(dr_estimator, in_features = n_col, out_features=out_features)
+  lr_model = LogClassifier(in_features = n_col, out_features=out_features)
   loss_fn = nn.BCELoss() 
   optimizer = torch.optim.Adam(lr_model.parameters(), lr = lr, weight_decay = weight_decay)
   for param in lr_model.parameters():
@@ -22,7 +22,7 @@ def log_train(X_s, y_s, dr_estimator, max_itr = 10000, lr = 0.01, weight_decay =
   for i in range(max_itr): 
       optimizer.zero_grad()
       
-      outputs = lr_model(X_s)
+      outputs = lr_model(X_s, r_ts)
       loss = loss_fn(outputs.squeeze(), y_s.squeeze())
 
       loss.backward()
