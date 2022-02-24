@@ -8,8 +8,8 @@ def log_test(model, X_t, y_t, r_st):
     model.eval()
 
     loss_fn = nn.BCELoss() 
-
-    outputs = model(X_t, r_st)
+    F = torch.cat((torch.ones(r_st.shape), X_t), dim = 1)
+    outputs = model(F, r_st)
     loss = loss_fn(outputs.squeeze(), y_t.squeeze())
     acc = torch.sum(torch.round(outputs) == y_t) / n_row
     print(f"Target Loss: {loss}. Target Accuracy: {acc}")

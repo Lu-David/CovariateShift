@@ -1,6 +1,6 @@
 from pyexpat import model
 import numpy as np
-from rba.train.log_train import log_train
+from rba.train.rba_train import rba_train
 from rba.test.log_test import log_test
 from rba.util import get_poly_data
 import torch
@@ -31,7 +31,7 @@ def get_mvn_estimator(mu_s, var_s, mu_t, var_t):
     mvn_t = multivariate_normal(mu_t, var_t)
     
     def mvn(x):
-        return torch.Tensor(mvn_s.pdf(x) / mvn_t.pdf(x)).unsqueeze(1)
+        return torch.Tensor(mvn_s.pdf(x) / mvn_t.pdf(x)).unsqueeze(1).detach()
 
     return mvn
 
@@ -91,6 +91,8 @@ def get_lrdr_estimator(X_s, X_t, weight_decays = [1, 5, 15]):
     #     X_t[:, [0]], X_t[:, [1]], X_t[:, [0]] ** 2, X_t[:, [0]] * X_t[:, [1]], X_t[:, [1]] ** 2
     # ), axis=1)
 
+    ones = torch.ones((X_s.shape[0], 1))
+
     X_s = get_poly_data(X_s, poly_features)
     X_t = get_poly_data(X_t, poly_features)
 
@@ -120,7 +122,7 @@ def get_lrdr_estimator(X_s, X_t, weight_decays = [1, 5, 15]):
     
     losses = torch.zeros((len(weight_decays), 1))
     for i, lamb in enumerate(weight_decays):
-        model = log_train(X_train, y_train, ones, weight_decay=lamb)
+        model = rba_train(X_train, y_train, ones, ones, weight_decay=lamb)
         loss, pred, acc = log_test(model, X_valid, y_valid)
         losses[i] = loss
     ind_min = torch.argmin(loss)
@@ -128,7 +130,7 @@ def get_lrdr_estimator(X_s, X_t, weight_decays = [1, 5, 15]):
     X_train = torch.cat((X_s, X_t))
     y_train = torch.cat((torch.ones((ns_row, 1)), torch.zeros((nt_row, 1))))
 
-    model = log_train(X_train, y_train, ones, max_itr=10000, weight_decay=weight_decays[ind_min])
+    model = rba_train(X_train, y_train, ones, ones, max_itr=10000, weight_decay=weight_decays[ind_min])
     
     def lrdr(x):
         x = torch.Tensor(get_poly_data(x, poly_features))

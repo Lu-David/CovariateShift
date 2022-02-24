@@ -21,8 +21,8 @@ n_row, n_col = x_1.shape
 
 x_1 = torch.FloatTensor(x_1)
 x_2 = torch.FloatTensor(x_2)
-# x_1_b = torch.cat((torch.ones((n_row, 1)), torch.FloatTensor(x_1)), dim = 1)
-# x_2_b = torch.cat((torch.ones((n_row, 1)), torch.FloatTensor(x_2)), dim = 1)
+x_1_b = torch.cat((torch.ones((n_row, 1)), torch.FloatTensor(x_1)), dim = 1)
+x_2_b = torch.cat((torch.ones((n_row, 1)), torch.FloatTensor(x_2)), dim = 1)
 y_1 = torch.FloatTensor(np.where(y_1 == 1, 1, 0))
 y_2 = torch.FloatTensor(np.where(y_2 == 1, 1, 0))
 

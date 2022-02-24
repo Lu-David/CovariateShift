@@ -1,5 +1,4 @@
 from rba.train.rba_train import rba_train
-from rba.train.log_train import log_train
 from rba.test.rba_test import rba_test
 from rba.test.log_test import log_test
 from rba.density_estimation import get_kernel_density_estimator, get_mvn_estimator, get_lrdr_estimator, ones, get_gmm_estimator, inverse
@@ -48,10 +47,13 @@ class BivariateExperiment():
         raise Exception(f"{name} density estimator does not exist! Available estimators are: {names}")
 
     def train_all(self):
-        r_st = self.dr_estimator(self.x_1).detach()
-        rba_model = rba_train(self.x_1, self.y_1, r_st) 
-        iw_model = log_train(self.x_1, self.y_1, 1 / r_st)
-        log_model = log_train(self.x_1, self.y_1, torch.ones(r_st.shape))
+        r_st = self.dr_estimator(self.x_1)
+        r_ts = 1 / r_st
+        ones = torch.ones(r_st.shape)
+
+        rba_model = rba_train(self.x_1, self.y_1, r_st, ones) 
+        iw_model = rba_train(self.x_1, self.y_1, ones, r_ts, lr = 0.005, max_itr=20000)
+        log_model = rba_train(self.x_1, self.y_1, ones, ones)
         self.models = [rba_model, iw_model, log_model]
 
     def test_all(self):
@@ -66,7 +68,6 @@ class BivariateExperiment():
         r_st_2 = self.dr_estimator(self.x_2)
 
         log, preds, acc_1 = log_test(model, self.x_1, self.y_1, r_st_1)
-
         log, preds, acc_2 = log_test(model, self.x_2, self.y_2, r_st_2) # log_test and rba_test are the same
 
         x_1_np = self.x_1.detach().numpy()

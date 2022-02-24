@@ -5,6 +5,7 @@ import matplotlib.transforms as transforms
 import torch
 
 from rba.util import get_poly_data
+from rba.test.log_test import log_test
 
 def confidence_ellipse(x, y, ax, n_std=3.0, facecolor='none', **kwargs):
     """
@@ -82,8 +83,8 @@ def heatmap_model(x, y, ax, model, dr_estimator):
 
     r_st = dr_estimator(coors)
 
-    model.eval()
-    predictions = model(coors, r_st)
-    predictions = torch.reshape(predictions, (dims[0], dims[1]))
+    log, preds, acc_1 = log_test(model, coors, torch.ones(r_st.shape), r_st) 
+
+    predictions = torch.reshape(preds, (dims[0], dims[1]))
 
     ax.imshow(predictions.detach().numpy(), cmap='Spectral', interpolation='nearest', origin='lower', extent=[mins[0], maxs[0], mins[1], maxs[1]])
