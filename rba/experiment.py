@@ -27,15 +27,18 @@ class BivariateExperiment():
         gaussian = BivariateGaussian(mu_s, var_s, mu_t, var_t, self.boundary_degree)
         self.x_1, self.y_1, self.x_2, self.y_2 = gaussian.gen_data()
 
-        # self.kde_dr = get_kernel_density_estimator(self.x_1, self.x_2)
         self.dr_estimator_ls = [
-            get_mvn_estimator(mu_s, var_s, mu_t, var_t),
+            # get_mvn_estimator(mu_s, var_s, mu_t, var_t),
+            # get_kernel_density_estimator(self.x_1, self.x_2),
+            # get_lrdr_estimator(self.x_1, self.x_2),
+            get_gmm_estimator(self.x_1, self.x_2),
         ]
-        # self.lr_dr = get_lrdr_estimator(self.x_1, self.x_2)
 
         self.dr_estimator = None
         
         self.models = []
+        
+        self.title = "No Title"
 
     def set_dr_estimator(self, name):
         names = []
@@ -88,7 +91,7 @@ class BivariateExperiment():
             return 
 
         fig, axes = plt.subplots(2, len(self.models))
-        desc = f"Bound_deg={self.boundary_degree}; mu_s={self.mu_s}; mu_t={self.mu_t}"
+        desc = self.title
         fig.suptitle(desc)
         
         self._plot_model(axes[:, 0], self.models[0], self.dr_estimator)
@@ -97,6 +100,6 @@ class BivariateExperiment():
 
         fig.tight_layout()
 
-        fig.savefig(f'experiment_{desc}.png')            
+        fig.savefig(f'{self.title}.png')            
 
 

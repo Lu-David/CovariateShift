@@ -1,7 +1,6 @@
 import unittest
 
 from rba.models.rba_classifier import RBAClassifier
-from rba.models.log_classifier import LogClassifier
 import torch  
 import torchviz
 import os
@@ -37,14 +36,6 @@ class RBATestCase(unittest.TestCase):
         self.assertTrue(torch.equal(temp_rst, self.r_st))
         self.assertTrue(torch.equal(temp_rts, self.r_ts))
         self.assertTrue(torch.equal(temp_x, self.x))
-
-    def testLogClassifer(self):
-        model = LogClassifier()
-        optimizer = torch.optim.Adam(model.parameters())
-        optimizer.zero_grad()
-
-        outputs = model(self.x, )
-
 
 if __name__ == '__main__':
     unittest.main()

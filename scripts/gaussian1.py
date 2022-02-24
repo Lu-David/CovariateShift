@@ -41,9 +41,25 @@ experiment.x_1 = x_1
 experiment.y_1 = y_1
 experiment.x_2 = x_2
 experiment.y_2 = y_2
-experiment.set_dr_estimator("mvn")
+
+# experiment.title = "mvn_gaussian1"
+# experiment.set_dr_estimator("mvn")
+# experiment.train_all()
+# experiment.plot_all()
+
+# experiment.title = "kde_gaussian1"
+# experiment.set_dr_estimator("kde")
+# experiment.train_all()
+# experiment.plot_all()
+
+# experiment.title = "lrdr_gaussian1"
+# experiment.set_dr_estimator("lrdr")
+# experiment.train_all()
+# experiment.plot_all()
+
+experiment.title = "gmm_gaussian1"
+experiment.set_dr_estimator("gmm")
 experiment.train_all()
 experiment.plot_all()
-
 
 

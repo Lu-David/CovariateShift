@@ -35,7 +35,6 @@ def get_mvn_estimator(mu_s, var_s, mu_t, var_t):
 
     return mvn
 
-# TODO fix gmm
 def get_gmm_estimator(X_s, X_t):
     _, n_col = X_s.shape
     n_components = n_col
@@ -43,8 +42,6 @@ def get_gmm_estimator(X_s, X_t):
         torch.mean(X_s, dim=0),
         torch.mean(X_t, dim=0),
     ), dim=0)
-
-    print("means_init", means_init)
 
     X_s = torch.Tensor(X_s)
     X_t = torch.Tensor(X_t)
@@ -73,9 +70,8 @@ def get_gmm_estimator(X_s, X_t):
     model = GaussianMixture(n_components, means_init=means_init).fit(X_train, y_train)
 
     def gmm(x):
-        pred = model.predict(x)
-        pred[pred == 0] = 0.001
-        return torch.Tensor(pred / (1 - pred)).unsqueeze(1)
+        pred = model.predict_proba(x)
+        return torch.Tensor(pred[:, 0] / pred[:, 1]).unsqueeze(1)
     
     return gmm
 
@@ -90,8 +86,6 @@ def get_lrdr_estimator(X_s, X_t, weight_decays = [1, 5, 15]):
     # X_t = np.concatenate((
     #     X_t[:, [0]], X_t[:, [1]], X_t[:, [0]] ** 2, X_t[:, [0]] * X_t[:, [1]], X_t[:, [1]] ** 2
     # ), axis=1)
-
-    ones = torch.ones((X_s.shape[0], 1))
 
     X_s = get_poly_data(X_s, poly_features)
     X_t = get_poly_data(X_t, poly_features)
@@ -116,25 +110,30 @@ def get_lrdr_estimator(X_s, X_t, weight_decays = [1, 5, 15]):
 
     X_train = torch.cat((torch.FloatTensor(X_s[indt_s, :]), torch.FloatTensor(X_t[indt_t, :])))
     X_valid = torch.cat((torch.FloatTensor(X_s[indv_s, :]), torch.FloatTensor(X_t[indv_t, :])))
+
+    ones_train = torch.ones((X_train.shape[0], 1))
+    ones_valid = torch.ones((X_valid.shape[0], 1))
+    ones_all = torch.cat((ones_train, ones_valid))
     
     y_train = torch.cat((torch.ones((ns_row - nv_s, 1)), torch.zeros((nt_row - nv_t, 1)) ))
     y_valid = torch.cat((torch.ones((nv_s, 1)), torch.zeros((nv_t, 1)) ))
     
     losses = torch.zeros((len(weight_decays), 1))
     for i, lamb in enumerate(weight_decays):
-        model = rba_train(X_train, y_train, ones, ones, weight_decay=lamb)
-        loss, pred, acc = log_test(model, X_valid, y_valid)
+        model = rba_train(X_train, y_train, ones_train, ones_train, weight_decay=lamb)
+        loss, pred, acc = log_test(model, X_valid, y_valid, ones_valid)
         losses[i] = loss
     ind_min = torch.argmin(loss)
 
     X_train = torch.cat((X_s, X_t))
     y_train = torch.cat((torch.ones((ns_row, 1)), torch.zeros((nt_row, 1))))
 
-    model = rba_train(X_train, y_train, ones, ones, max_itr=10000, weight_decay=weight_decays[ind_min])
+    model = rba_train(X_train, y_train, ones_all, ones_all, max_itr=10000, weight_decay=weight_decays[ind_min])
     
     def lrdr(x):
         x = torch.Tensor(get_poly_data(x, poly_features))
-        pred = model(x)
-        return pred / (1 - pred)
+        r_st = torch.ones((x.shape[0], 1))
+        log, pred, acc_1 = log_test(model, x, r_st, r_st)
+        return (pred / (1 - pred)).detach()
 
     return lrdr
