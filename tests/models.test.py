@@ -22,7 +22,7 @@ class RBATestCase(unittest.TestCase):
         self.optimizer = torch.optim.Adam(self.model.parameters())
         self.optimizer.zero_grad()
 
-    def testRSTDoesNotChange(self):
+    def testInputDoesNotChange(self):
         temp_x = self.x.clone()
         temp_rst = self.r_st.clone()
         temp_rts = self.r_ts.clone()
@@ -36,6 +36,22 @@ class RBATestCase(unittest.TestCase):
         self.assertTrue(torch.equal(temp_rst, self.r_st))
         self.assertTrue(torch.equal(temp_rts, self.r_ts))
         self.assertTrue(torch.equal(temp_x, self.x))
+
+    def testModelPolyFeatures(self):
+        self.model = RBAClassifier(poly_features=2)
+        temp_x = self.x.clone()
+        temp_rst = self.r_st.clone()
+        temp_rts = self.r_ts.clone()
+
+        outputs = self.model(self.x, self.r_st)
+        outputs.backward(self.y)
+
+        self.optimizer.step()
+
+        self.assertTrue(torch.equal(temp_rst, self.r_st))
+        self.assertTrue(torch.equal(temp_rts, self.r_ts))
+        self.assertTrue(torch.equal(temp_x, self.x))
+
 
 if __name__ == '__main__':
     unittest.main()

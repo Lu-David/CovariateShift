@@ -31,21 +31,13 @@ var_s = [[3, -2], [-2, 3]]
 mu_t = [7, 7] 
 var_t = [[3, 2], [2, 3]] 
 
-mvn = get_mvn_estimator(mu_s, var_s, mu_t, var_t)
-
-# r_st = mvn(x_1)
-# rba_train(x_1, y_1, r_st)
-
 experiment = BivariateExperiment(mu_s, var_s, mu_t, var_t, poly_features=1)
-experiment.x_1 = x_1
-experiment.y_1 = y_1
-experiment.x_2 = x_2
-experiment.y_2 = y_2
+experiment.set_data(x_1, y_1, x_2, y_2)
 
-# experiment.title = "mvn_gaussian1"
-# experiment.set_dr_estimator("mvn")
-# experiment.train_all()
-# experiment.plot_all()
+experiment.title = "mvn_gaussian1"
+experiment.set_dr_estimator("mvn")
+experiment.train_all()
+experiment.plot_all()
 
 # experiment.title = "kde_gaussian1"
 # experiment.set_dr_estimator("kde")
@@ -57,9 +49,9 @@ experiment.y_2 = y_2
 # experiment.train_all()
 # experiment.plot_all()
 
-experiment.title = "gmm_gaussian1"
-experiment.set_dr_estimator("gmm")
-experiment.train_all()
-experiment.plot_all()
+# experiment.title = "gmm_gaussian1"
+# experiment.set_dr_estimator("gmm")
+# experiment.train_all()
+# experiment.plot_all()
 
 

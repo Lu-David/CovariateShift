@@ -5,16 +5,18 @@ import torchviz
 from rba.models.rba_classifier import RBAClassifier
 from rba.util import get_poly_data
 
-def rba_train(X_s, y_s, r_st, r_ts, max_itr = 10000, lr = 0.01, weight_decay = 0, poly_features = 1):
+def rba_train(X_s, y_s, r_st, r_ts, max_itr = 10000, lr = 0.01, weight_decay = 0):
 
     _, n_col = X_s.shape
     _, out_features = y_s.shape
 
     bias = True
-    X = X_s
     if True: # not torch.equal(r_ts, torch.ones(r_ts.shape)):
         bias = False
-        X = torch.cat((torch.ones(r_ts.shape), X_s), dim = 1)
+        X = torch.cat((
+            torch.ones(r_ts.shape), 
+            X_s
+        ), dim = 1)
     
     model = RBAClassifier(in_features = n_col + int(not bias), out_features=out_features, bias = bias)
         
