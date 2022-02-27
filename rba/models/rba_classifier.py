@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.optim import Adam
-
+from sklearn.preprocessing import PolynomialFeatures
 
 class RBAGrad(torch.autograd.Function):
     @staticmethod
@@ -22,8 +22,7 @@ class RBAClassifier(nn.Module):
     """
     Single layer robust bias aware (RBA) classifier
     """
-
-    def __init__(self, dr_estimator, in_features = 2, out_features = 1, degree = 1, bias = True):
+    def __init__(self, in_features = 2, out_features = 1, bias = True, poly_features = 1):
         """[summary]
 
         Args:
@@ -32,14 +31,15 @@ class RBAClassifier(nn.Module):
             bias (bool, optional): Defaults to False.
         """
 
+        # self.poly = PolynomialFeatures(poly_features, include_bias = False)
         super(RBAClassifier, self).__init__()
-        self.layer1 = nn.Linear(in_features, out_features, bias = bias)
-        self.__name__ = "RBA_" + dr_estimator.__name__
-        self.dr_estimator = dr_estimator
-        self.r_st = None
-        self.prev = None
+        # temp = torch.ones((1, in_features))
+        # self.poly_temp = self.poly.fit_transform(temp)
+        # self.in_features = self.poly_temp.shape[1]
 
-    def forward(self, input):
+        self.layer1 = nn.Linear(in_features, out_features, bias = bias)
+
+    def forward(self, input, r_st):
         """[summary]
 
         Args:
@@ -48,10 +48,5 @@ class RBAClassifier(nn.Module):
         Returns:
             torch.Tensor: predictions
         """
-        # TODO: Fix the hacky workaround to limit recalcultion of density ratios
-        if self.r_st == None or len(input) != self.prev:
-            self.r_st = self.dr_estimator(input).detach()
-            self.r_st = torch.clip(self.r_st, -5000, 5000)
-            self.prev = len(input)
-
-        return RBAGrad.apply(self.layer1(input), self.r_st)
+        # poly_input = torch.Tensor(self.poly.fit_transform(input))
+        return RBAGrad.apply(self.layer1(input), r_st)

@@ -1,4 +1,6 @@
 from rba.experiment import BivariateExperiment
+from rba.train.rba_train import rba_train
+from rba.density_estimation import get_mvn_estimator
 
 import scipy.io
 import numpy as np
@@ -19,8 +21,8 @@ n_row, n_col = x_1.shape
 
 x_1 = torch.FloatTensor(x_1)
 x_2 = torch.FloatTensor(x_2)
-# x_1_b = torch.cat((torch.ones((n_row, 1)), torch.FloatTensor(x_1)), dim = 1)
-# x_2_b = torch.cat((torch.ones((n_row, 1)), torch.FloatTensor(x_2)), dim = 1)
+x_1_b = torch.cat((torch.ones((n_row, 1)), torch.FloatTensor(x_1)), dim = 1)
+x_2_b = torch.cat((torch.ones((n_row, 1)), torch.FloatTensor(x_2)), dim = 1)
 y_1 = torch.FloatTensor(np.where(y_1 == 1, 1, 0))
 y_2 = torch.FloatTensor(np.where(y_2 == 1, 1, 0))
 
@@ -29,14 +31,30 @@ var_s = [[3, -2], [-2, 3]]
 mu_t = [7, 7] 
 var_t = [[3, 2], [2, 3]] 
 
+experiment = BivariateExperiment(mu_s, var_s, mu_t, var_t, poly_features=1, b_thru_pts = np.array([
+            [5, 5],
+            [6, 7.5],
+            [10, 2.5]
+        ]))
 
-experiment = BivariateExperiment(mu_s, var_s, mu_t, var_t)
-experiment.x_1 = x_1
-experiment.y_1 = y_1
-experiment.x_2 = x_2
-experiment.y_2 = y_2
+experiment.title = "mvn_gaussian1"
+experiment.set_dr_estimator("mvn")
 experiment.train_all()
 experiment.plot_all()
 
+experiment.title = "kde_gaussian1"
+experiment.set_dr_estimator("kde")
+experiment.train_all()
+experiment.plot_all()
+
+experiment.title = "lrdr_gaussian1"
+experiment.set_dr_estimator("lrdr")
+experiment.train_all()
+experiment.plot_all()
+
+experiment.title = "gmm_gaussian1"
+experiment.set_dr_estimator("gmm")
+experiment.train_all()
+experiment.plot_all()
 
 

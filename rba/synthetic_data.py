@@ -3,9 +3,10 @@ import matplotlib.pyplot as plt
 from scipy.stats import multivariate_normal
 import scipy
 import torch
+from rba.util import get_poly_data
 
 class BivariateGaussian:
-    def __init__(self, mu_s, var_s, mu_t, var_t, boundary_degree = 3):
+    def __init__(self, mu_s, var_s, mu_t, var_t, num_points = 100):
         self.mu_s = mu_s
         self.var_s = var_s
         self.mu_t = mu_t
@@ -14,37 +15,55 @@ class BivariateGaussian:
         self.mvn_s = multivariate_normal(mu_s, var_s)
         self.mvn_t = multivariate_normal(mu_t, var_t)
 
-        self.boundary_degree = boundary_degree
+        self.x_s = torch.FloatTensor(self.mvn_s.rvs(num_points))
+        self.x_t = torch.FloatTensor(self.mvn_t.rvs(num_points))
+
+        self.gen_rand_decision_boundary()
+
+    def set_poly_features(self, poly_features):
+        self.poly_features = poly_features
+        self.x_s_poly = get_poly_data(self.x_s, poly_features)
+        self.x_t_poly = get_poly_data(self.x_t, poly_features)
     
-    def gen_rand_decision_boundary(self):
-        samples = (self.mvn_s.rvs(self.boundary_degree + 1) 
-            + self.mvn_t.rvs(self.boundary_degree + 1)) / 2
+    def gen_rand_decision_boundary(self, boundary_degree = 3):
+        samples = (self.mvn_s.rvs(boundary_degree + 1) 
+            + self.mvn_t.rvs(boundary_degree + 1)) / 2
         x1 = samples[:, 0]
         x2 = samples[:, 1]
 
-        A = np.array([x1**i for i in range(self.boundary_degree + 1)]).T
+        A = np.array([x1**i for i in range(boundary_degree + 1)]).T
         A_inv = scipy.linalg.inv(A)
         params = np.dot(A_inv, x2)
 
         def get_y(x1, x2):
-            temp = np.array([x1**i for i in range(self.boundary_degree + 1)])
-            y = np.dot(params, temp)
-            return np.where(x2 >= y, 1,0).reshape((-1, 1))
+            temp = torch.ones((len(x1), len(samples))) # Tensor([x1**i for i in range(len(samples))])
+            for i in range(len(samples)):
+                temp[:, i] = x1**i
+            y = torch.FloatTensor(np.dot(temp, params))
+            return torch.where(x2 >= y, 1,0).reshape((-1, 1)).to(torch.float)
         
-        return get_y
+        self.get_y = get_y
+        self.y_s = self.get_y(self.x_s[:, 0], self.x_s[:, 1])
+        self.y_t = self.get_y(self.x_t[:, 0], self.x_t[:, 1])
 
-    def gen_data(self, num_points = 100, noise = 0.05):
-        # TODO add noise
-        x_s = self.mvn_s.rvs(num_points)
-        x_t = self.mvn_t.rvs(num_points)
+    def gen_decision_boundary_points(self, samples : np.array):
+        x1 = samples[:, 0]
+        x2 = samples[:, 1]
 
-        get_y = self.gen_rand_decision_boundary()
+        A = np.array([x1**i for i in range(len(samples))]).T
+        A_inv = scipy.linalg.inv(A)
+        params = np.dot(A_inv, x2)
+
+        def get_y(x1, x2):
+            temp = torch.ones((len(x1), len(samples))) # Tensor([x1**i for i in range(len(samples))])
+            for i in range(len(samples)):
+                temp[:, i] = x1**i
+            y = torch.FloatTensor(np.dot(temp, params))
+            return torch.where(x2 >= y, 1,0).reshape((-1, 1)).to(torch.float)
         
-        y_s = get_y(x_s[:, 0], x_s[:, 1])
-        y_t = get_y(x_t[:, 0], x_t[:, 1])
-
-        return torch.Tensor(x_s), torch.Tensor(y_s), torch.Tensor(x_t), torch.Tensor(y_t)
-
+        self.get_y = get_y
+        self.y_s = self.get_y(self.x_s[:, 0], self.x_s[:, 1])
+        self.y_t = self.get_y(self.x_t[:, 0], self.x_t[:, 1])
 
 if __name__ == "__main__":    
     mu_s = [6, 6] 

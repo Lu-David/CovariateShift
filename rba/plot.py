@@ -4,6 +4,9 @@ from matplotlib.patches import Ellipse
 import matplotlib.transforms as transforms
 import torch
 
+from rba.util import get_poly_data
+from rba.test.log_test import log_test
+
 def confidence_ellipse(x, y, ax, n_std=3.0, facecolor='none', **kwargs):
     """
     Create a plot of the covariance confidence ellipse of *x* and *y*.
@@ -62,12 +65,14 @@ def scatter_binary(x, y, ax):
     ax.scatter(pos[:,0], pos[:,1], marker="x", color="black", s = 7)
     ax.scatter(neg[:,0], neg[:,1], marker="o", color="white", s = 7)
 
-def heatmap_model(x, y, ax, model):
+def heatmap_model(x, ax, model, dr_estimator, poly_features):
     mean = torch.mean(x, axis=0)
     std = torch.std(x, axis=0)
     
     maxs = torch.max(x, dim = 0).values
+    maxs = maxs + 0.2 * maxs
     mins = torch.min(x, dim = 0).values
+    mins = mins - 0.2 * mins
 
     res = 0.01
     X_dim1, X_dim2 = np.meshgrid(np.arange(mins[0], maxs[0] + res, res), np.arange(mins[1], maxs[1] + res, res))
@@ -76,8 +81,12 @@ def heatmap_model(x, y, ax, model):
     coors = np.dstack((X_dim1, X_dim2))
     coors = torch.FloatTensor(coors.reshape((dims[0] * dims[1], -1)))
 
-    model.eval()
-    predictions = model(coors)
-    predictions = torch.reshape(predictions, (dims[0], dims[1]))
+    r_st = dr_estimator(coors)
+
+    coors = get_poly_data(coors, poly_features)
+
+    log, preds, acc_1 = log_test(model, coors, torch.ones(r_st.shape), r_st) 
+
+    predictions = torch.reshape(preds, (dims[0], dims[1]))
 
     ax.imshow(predictions.detach().numpy(), cmap='Spectral', interpolation='nearest', origin='lower', extent=[mins[0], maxs[0], mins[1], maxs[1]])
