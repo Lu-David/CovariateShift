@@ -1,4 +1,5 @@
 from rba.experiment import BivariateExperiment
+from rba.synthetic_data import BivariateGaussian
 from rba.train.rba_train import rba_train
 from rba.density_estimation import get_mvn_estimator
 from rba.util import get_poly_data
@@ -40,31 +41,38 @@ B = [
             [10, 2.5]
     ]),  
     np.array([ # Cubic
-            [2.5, 7.5],
-            [5, 5],
-            [6, 7.5],
-            [10, 2.5]
+            [2.5, 2.5],
+            [5, 10],
+            [7.5, 0],
+            [10, 15]
     ])
 ]
 
+gaussian = BivariateGaussian(mu_s, var_s, mu_t, var_t)
+gaussian.x_s = x_1
+gaussian.y_s = y_1
+gaussian.x_t = x_2
+gaussian.y_t = y_2
 for f in F:
+    gaussian.set_poly_features(f)
     for b in B:
-        experiment = BivariateExperiment(mu_s, var_s, mu_t, var_t, poly_features=f, b_thru_pts = b)
+        gaussian.gen_decision_boundary_points(b) 
+        experiment = BivariateExperiment(gaussian)
 
-        experiment.title = f"mvn_gaussian1_B{len(b) - 1}_F{f}"
-        experiment.set_dr_estimator("mvn")
-        experiment.train_all()
-        experiment.plot_all()
+        # experiment.title = f"mvn_gaussian1_B{len(b) - 1}_F{f}"
+        # experiment.set_dr_estimator("mvn")
+        # experiment.train_all()
+        # experiment.plot_all()
 
-        experiment.title = f"kde_gaussian1_B{len(b) - 1}_F{f}"
-        experiment.set_dr_estimator("kde")
-        experiment.train_all()
-        experiment.plot_all()
+        # experiment.title = f"kde_gaussian1_B{len(b) - 1}_F{f}"
+        # experiment.set_dr_estimator("kde")
+        # experiment.train_all()
+        # experiment.plot_all()
 
-        experiment.title = f"lrdr_gaussian1_B{len(b) - 1}_F{f}"
-        experiment.set_dr_estimator("lrdr")
-        experiment.train_all()
-        experiment.plot_all()
+        # experiment.title = f"lrdr_gaussian1_B{len(b) - 1}_F{f}"
+        # experiment.set_dr_estimator("lrdr")
+        # experiment.train_all()
+        # experiment.plot_all()
 
         experiment.title = f"gmm_gaussian1_B{len(b) - 1}_F{f}"
         experiment.set_dr_estimator("gmm")
