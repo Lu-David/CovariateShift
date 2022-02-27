@@ -28,29 +28,45 @@ var_s = [[3, -2], [-2, 3]]
 mu_t = [7, 7] 
 var_t = [[3, 2], [2, 3]] 
 
-F = [1]
-B = [1, 2, 3]
+F = [1, 2, 3]
+B = [
+    np.array([ # Linear 
+            [5, 5],
+            [6, 7.5],
+    ]), 
+    np.array([ # Quadratic 
+            [5, 5],
+            [6, 7.5],
+            [10, 2.5]
+    ]),  
+    np.array([ # Cubic
+            [2.5, 7.5],
+            [5, 5],
+            [6, 7.5],
+            [10, 2.5]
+    ])
+]
 
 for f in F:
     for b in B:
-        experiment = BivariateExperiment(mu_s, var_s, mu_t, var_t, boundary_degree = b, poly_features=f)
+        experiment = BivariateExperiment(mu_s, var_s, mu_t, var_t, poly_features=f, b_thru_pts = b)
 
-        experiment.title = f"mvn_gaussian1_B{b}_F{f}"
+        experiment.title = f"mvn_gaussian1_B{len(b) - 1}_F{f}"
         experiment.set_dr_estimator("mvn")
         experiment.train_all()
         experiment.plot_all()
 
-        experiment.title = f"kde_gaussian1_B{b}_F{f}"
+        experiment.title = f"kde_gaussian1_B{len(b) - 1}_F{f}"
         experiment.set_dr_estimator("kde")
         experiment.train_all()
         experiment.plot_all()
 
-        experiment.title = f"lrdr_gaussian1_B{b}_F{f}"
+        experiment.title = f"lrdr_gaussian1_B{len(b) - 1}_F{f}"
         experiment.set_dr_estimator("lrdr")
         experiment.train_all()
         experiment.plot_all()
 
-        experiment.title = f"gmm_gaussian1_B{b}_F{f}"
+        experiment.title = f"gmm_gaussian1_B{len(b) - 1}_F{f}"
         experiment.set_dr_estimator("gmm")
         experiment.train_all()
         experiment.plot_all()

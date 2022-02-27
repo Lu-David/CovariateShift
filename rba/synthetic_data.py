@@ -16,6 +16,8 @@ class BivariateGaussian:
         self.mvn_t = multivariate_normal(mu_t, var_t)
 
         self.boundary_degree = boundary_degree
+
+        self.get_y = self.gen_rand_decision_boundary()
     
     def gen_rand_decision_boundary(self):
         samples = (self.mvn_s.rvs(self.boundary_degree + 1) 
@@ -32,7 +34,22 @@ class BivariateGaussian:
             y = np.dot(params, temp)
             return np.where(x2 >= y, 1,0).reshape((-1, 1))
         
-        return get_y
+        self.get_y = get_y
+
+    def gen_decision_boundary_points(self, samples : np.array):
+        x1 = samples[:, 0]
+        x2 = samples[:, 1]
+
+        A = np.array([x1**i for i in range(self.boundary_degree + 1)]).T
+        A_inv = scipy.linalg.inv(A)
+        params = np.dot(A_inv, x2)
+
+        def get_y(x1, x2):
+            temp = np.array([x1**i for i in range(self.boundary_degree + 1)])
+            y = np.dot(params, temp)
+            return np.where(x2 >= y, 1,0).reshape((-1, 1))
+        
+        self.get_y = get_y
 
     def gen_data(self, num_points = 100, noise = 0.05):
         # TODO add noise
@@ -41,8 +58,8 @@ class BivariateGaussian:
 
         get_y = self.gen_rand_decision_boundary()
         
-        y_s = get_y(x_s[:, 0], x_s[:, 1])
-        y_t = get_y(x_t[:, 0], x_t[:, 1])
+        y_s = self.get_y(x_s[:, 0], x_s[:, 1])
+        y_t = self.get_y(x_t[:, 0], x_t[:, 1])
 
         return torch.Tensor(x_s), torch.Tensor(y_s), torch.Tensor(x_t), torch.Tensor(y_t)
 

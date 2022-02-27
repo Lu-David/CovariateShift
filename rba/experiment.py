@@ -16,7 +16,7 @@ from sklearn.preprocessing import PolynomialFeatures
 
 class BivariateExperiment():
 
-    def __init__(self, mu_s, var_s, mu_t, var_t, boundary_degree = 1, poly_features = 1):
+    def __init__(self, mu_s, var_s, mu_t, var_t, boundary_degree = 1, poly_features = 1, b_thru_pts = None):
         self.mu_s = mu_s
         self.var_s = var_s
         self.mu_t = mu_t 
@@ -24,9 +24,13 @@ class BivariateExperiment():
         self.poly_features = poly_features
         self.boundary_degree = boundary_degree
 
-        gaussian = BivariateGaussian(mu_s, var_s, mu_t, var_t, self.boundary_degree)
-        x_1, y_1, x_2, y_2 = gaussian.gen_data()
-        self.set_data(x_1, y_1, x_2, y_2)
+        gaussian = BivariateGaussian(self.mu_s, self.var_s, self.mu_t, self.var_t, self.boundary_degree)
+        if b_thru_pts is None:
+            gaussian.gen_decision_boundary_points(b_thru_pts)
+        self.x_1, self.y_1, self.x_2, self.y_2 = gaussian.gen_data()
+
+        self.x_1_poly = get_poly_data(self.x_1, self.poly_features)
+        self.x_2_poly = get_poly_data(self.x_2, self.poly_features)
 
         self.dr_estimator_ls = [
             get_mvn_estimator(mu_s, var_s, mu_t, var_t),
@@ -41,15 +45,6 @@ class BivariateExperiment():
         self.models = []
         
         self.title = "No Title"
-
-    def set_data(self, x_1, y_1, x_2, y_2):
-
-        self.x_1 = x_1
-        self.y_1 = y_1
-        self.x_2 = x_2
-        self.y_2 = y_2
-        self.x_1_poly = get_poly_data(self.x_1, self.poly_features)
-        self.x_2_poly = get_poly_data(self.x_2, self.poly_features)
 
     def set_dr_estimator(self, name):
         names = []

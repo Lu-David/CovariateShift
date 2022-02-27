@@ -31,27 +31,30 @@ var_s = [[3, -2], [-2, 3]]
 mu_t = [7, 7] 
 var_t = [[3, 2], [2, 3]] 
 
-experiment = BivariateExperiment(mu_s, var_s, mu_t, var_t, poly_features=1)
-experiment.set_data(x_1, y_1, x_2, y_2)
+experiment = BivariateExperiment(mu_s, var_s, mu_t, var_t, poly_features=1, b_thru_pts = np.array([
+            [5, 5],
+            [6, 7.5],
+            [10, 2.5]
+        ]))
 
 experiment.title = "mvn_gaussian1"
 experiment.set_dr_estimator("mvn")
 experiment.train_all()
 experiment.plot_all()
 
-# experiment.title = "kde_gaussian1"
-# experiment.set_dr_estimator("kde")
-# experiment.train_all()
-# experiment.plot_all()
+experiment.title = "kde_gaussian1"
+experiment.set_dr_estimator("kde")
+experiment.train_all()
+experiment.plot_all()
 
-# experiment.title = "lrdr_gaussian1"
-# experiment.set_dr_estimator("lrdr")
-# experiment.train_all()
-# experiment.plot_all()
+experiment.title = "lrdr_gaussian1"
+experiment.set_dr_estimator("lrdr")
+experiment.train_all()
+experiment.plot_all()
 
-# experiment.title = "gmm_gaussian1"
-# experiment.set_dr_estimator("gmm")
-# experiment.train_all()
-# experiment.plot_all()
+experiment.title = "gmm_gaussian1"
+experiment.set_dr_estimator("gmm")
+experiment.train_all()
+experiment.plot_all()
 
 
