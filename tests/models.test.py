@@ -1,6 +1,6 @@
 import unittest
 
-from rba.models.rba_classifier import RBAClassifier
+from rba.models.rba_classifier import RBAClassifierSimple
 import torch  
 import torchviz
 import os
@@ -18,7 +18,7 @@ class RBATestCase(unittest.TestCase):
 
         self.y = torch.round(torch.rand((100, 1)))
 
-        self.model = RBAClassifier()
+        self.model = RBAClassifierSimple()
         self.optimizer = torch.optim.Adam(self.model.parameters())
         self.optimizer.zero_grad()
 
@@ -38,7 +38,7 @@ class RBATestCase(unittest.TestCase):
         self.assertTrue(torch.equal(temp_x, self.x))
 
     def testModelPolyFeatures(self):
-        self.model = RBAClassifier(poly_features=2)
+        self.model = RBAClassifierSimple(poly_features=2)
         temp_x = self.x.clone()
         temp_rst = self.r_st.clone()
         temp_rts = self.r_ts.clone()

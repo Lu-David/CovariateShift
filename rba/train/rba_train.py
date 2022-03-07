@@ -2,8 +2,7 @@ import torch
 import torch.nn as nn
 import numpy as np
 import torchviz
-from rba.models.rba_classifier import RBAClassifier
-from rba.util import get_poly_data
+from rba.models.rba_classifier import RBAClassifierSimple
 
 def rba_train(X_s, y_s, r_st, r_ts, max_itr = 10000, lr = 0.01, weight_decay = 0):
 
@@ -18,7 +17,7 @@ def rba_train(X_s, y_s, r_st, r_ts, max_itr = 10000, lr = 0.01, weight_decay = 0
             X_s
         ), dim = 1)
     
-    model = RBAClassifier(in_features = n_col + int(not bias), out_features=out_features, bias = bias)
+    model = RBAClassifierSimple(in_features = n_col + int(not bias), out_features=out_features, bias = bias)
         
     loss_fn = nn.BCELoss() 
     optimizer = torch.optim.Adam(model.parameters(), lr = lr, weight_decay = weight_decay)

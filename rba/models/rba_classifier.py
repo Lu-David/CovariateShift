@@ -18,11 +18,11 @@ class RBAGrad(torch.autograd.Function):
         grad_input = (prob - grad_temp)
         return grad_input, None
 
-class RBAClassifier(nn.Module):
+class RBAClassifierSimple(nn.Module):
     """
     Single layer robust bias aware (RBA) classifier
     """
-    def __init__(self, in_features = 2, out_features = 1, bias = True, poly_features = 1):
+    def __init__(self, in_features = 2, out_features = 1, bias = True):
         """[summary]
 
         Args:
@@ -32,7 +32,7 @@ class RBAClassifier(nn.Module):
         """
 
         # self.poly = PolynomialFeatures(poly_features, include_bias = False)
-        super(RBAClassifier, self).__init__()
+        super(RBAClassifierSimple, self).__init__()
         # temp = torch.ones((1, in_features))
         # self.poly_temp = self.poly.fit_transform(temp)
         # self.in_features = self.poly_temp.shape[1]
@@ -48,5 +48,39 @@ class RBAClassifier(nn.Module):
         Returns:
             torch.Tensor: predictions
         """
-        # poly_input = torch.Tensor(self.poly.fit_transform(input))
         return RBAGrad.apply(self.layer1(input), r_st)
+
+
+class RBAClassifierMLP(nn.Module):
+    """
+    Single layer robust bias aware (RBA) classifier
+    """
+    def __init__(self, in_features = 2, out_features = 1, bias = True):
+        """[summary]
+
+        Args:
+            in_features (int, optional): number of columns in X. Defaults to 2.
+            out_features (int, optional): number of classes in Y. Defaults to 1.
+            bias (bool, optional): Defaults to False.
+        """
+
+        super(RBAClassifierSimple, self).__init__()
+
+        self.layer1 = nn.Linear(in_features, 16, bias = bias)
+        self.layer2 = nn.Linear(16, 16)
+        self.layer3 = nn.Linear(16, out_features)
+
+    def forward(self, input, r_st):
+        """[summary]
+
+        Args:
+            input (torch.Tensor): features
+
+        Returns:
+            torch.Tensor: predictions
+        """
+        output = self.layer1(input)
+        output = self.layer2(output)
+        output = self.layer3(output)
+
+        return RBAGrad.apply(output, r_st)
